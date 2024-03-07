@@ -1,40 +1,36 @@
-import React, { useState } from "react";
+import React from "react";
 import { Button, Form, Input } from "antd";
 import axios from "axios";
 import DashBoardImg from "../assets/img/dashboard.png";
 import "./login.css";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Login = () => {
-  const [loginData, setLoginData] = useState({
-    email: "",
-    password: "",
-  });
+  const onFinishFailed = (errorInfo) => {
+    console.log("Failed:", errorInfo);
+  };
+  const navigate = useNavigate();
 
   const onFinish = async (values) => {
     console.log("Success:", values);
     try {
       const response = await axios.post(
-        "https://payment-system-sigma.vercel.app/api/merchant/login",
-        loginData
+        "http://localhost:5000/api/merchant/login",
+        values
       );
-      console.log("Response:", response.data);
+      localStorage.setItem("token", response.data.token);
+      console.log("Response:", response.data.token);
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Something Went Wrong",
+        text: "Wrong Email or Password!",
+      });
     }
   };
-
-  const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setLoginData({
-      ...loginData,
-      [name]: value,
-    });
-  };
-
   return (
     <div className="login">
       <div className="login-form">
@@ -63,16 +59,16 @@ const Login = () => {
           autoComplete="off"
         >
           <Form.Item
-            label="Username"
-            name="username"
+            label="Email"
+            name="email"
             rules={[
               {
                 required: true,
-                message: "Please enter your username",
+                message: "Please input your email!",
               },
             ]}
           >
-            <Input onChange={handleChange} />
+            <Input />
           </Form.Item>
 
           <Form.Item
@@ -81,11 +77,11 @@ const Login = () => {
             rules={[
               {
                 required: true,
-                message: "Please enter your password",
+                message: "Please input your password!",
               },
             ]}
           >
-            <Input.Password onChange={handleChange} />
+            <Input.Password />
           </Form.Item>
 
           <Form.Item
@@ -94,12 +90,8 @@ const Login = () => {
               span: 16,
             }}
           >
-            <Button
-              type="primary"
-              htmlType="submit"
-              style={{ backgroundColor: "blueviolet" }}
-            >
-              Login
+            <Button type="primary" htmlType="submit">
+              Submit
             </Button>
           </Form.Item>
         </Form>
