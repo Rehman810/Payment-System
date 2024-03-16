@@ -1,0 +1,73 @@
+.payments{
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 80%;
+    flex-direction: column;
+}
+.records{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    
+}
+.paymentsh1{
+    color: #676262;
+    font-size: 2.5vw;
+    font-weight: bold;
+}
+.record1, .record2, .record3{
+    width: 12vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 20px;
+    padding: 20px;
+    cursor: pointer;
+    margin: 10px;
+}
+.record1{
+    background-color: #ebfdff;
+    border: 1px solid #05d0eb;
+}
+.record2{
+    background-color: #edfdf3;
+        border: 1px solid #08f15e;
+
+}
+.record3{
+    background-color: #fcf2f1;
+        border: 1px solid #db1d0c;
+
+}
+.recordSpan{
+    font-size: 1vw;
+    color: #676262;
+    margin-bottom: 20px;
+}
+.pen-rec{
+    border: 1px solid #05d0eb;
+    border-radius: 15px;
+    color: #05d0eb;
+    padding: 5px;
+    font-size: 10px;
+    font-weight: bold;
+}
+.paid-rec{
+    border: 1px solid #08f15e;
+    border-radius: 15px;
+    color: #08f15e;
+    padding: 5px;
+    font-size: 10px;
+    font-weight: bold;
+}
+.rej-rec{
+    border: 1px solid #db1d0c;
+    border-radius: 15px;
+    color: #db1d0c;
+    padding: 5px;
+    font-size: 10px;
+    font-weight: bold;
+}

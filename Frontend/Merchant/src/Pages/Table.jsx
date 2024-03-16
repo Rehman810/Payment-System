@@ -61,7 +61,7 @@ export default function TableComp() {
   return (
     <TableContainer
       component={Paper}
-      style={{ width: "100%", marginLeft: "18vw" }}
+      style={{ width: "100%", marginLeft: "18vw", marginTop: "10vw" }}
     >
       <Table sx={{ minWidth: 700 }} aria-label="customized table">
         <TableHead>

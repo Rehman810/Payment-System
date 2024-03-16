@@ -30,12 +30,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-
-
 export default function TableComp() {
   const [data, setData] = useState([]);
   let token = localStorage.getItem("token");
-
+  let [action, setAction] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -52,44 +50,40 @@ export default function TableComp() {
         setData(response.data);
       } catch (error) {
         console.error("Error:", error);
-        // Handle error here
       }
     };
 
-    fetchData(); // Call the fetchData function when the component mounts
+    fetchData();
   }, []);
 
   const handleButtonClick = async (value, paymentId) => {
-  console.log("Button clicked:", value, "Payment ID:", paymentId);
-  let token = localStorage.getItem("token");
+    console.log("Button clicked:", value, "Payment ID:", paymentId);
+    let token = localStorage.getItem("token");
 
-  try {
-    const response = await axios.post(
-      "http://localhost:5000/api/customer/respondToPaymentRequest",
-      { action: value, paymentId: paymentId },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    console.log("Response:", response.data);
-    setProcessedIds([...processedIds, id]);
-  } catch (error) {
-    console.error("Error:", error);
-  }
-};
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/customer/respondToPaymentRequest",
+        { action: value, paymentId: paymentId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response:", response.data);
+      setAction(true);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
   return (
-    <TableContainer
-      component={Paper}
-      style={{ width: "100%", marginLeft: "18vw" }}
-    >
+    <TableContainer component={Paper} style={{ width: "80%" }}>
       <Table sx={{ minWidth: 700 }} aria-label="customized table">
         <TableHead>
           <TableRow>
             <StyledTableCell>Customer Account Number</StyledTableCell>
-            <StyledTableCell>Merchant Account</StyledTableCell>
+            <StyledTableCell>Merchant Account Number</StyledTableCell>
             <StyledTableCell align="right">Description</StyledTableCell>
             <StyledTableCell align="right">Status</StyledTableCell>
             <StyledTableCell align="right">Amount</StyledTableCell>
@@ -110,23 +104,24 @@ export default function TableComp() {
                 <StyledTableCell align="right">{a.status}</StyledTableCell>
                 <StyledTableCell align="right">{a.amount}</StyledTableCell>
                 <StyledTableCell align="right">
-                  <div>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={() => handleButtonClick("approve", a._id)}
-                    >
-                      Pay
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => handleButtonClick("Reject", a._id)}
-                    >
-                      Reject
-                    </Button>
-                  </div>
-                
+                  {action == false ? (
+                    <div>
+                      <Button
+                        variant="contained"
+                        color="success"
+                        onClick={() => handleButtonClick("approve", a._id)}
+                      >
+                        Pay
+                      </Button>
+                      <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => handleButtonClick("Reject", a._id)}
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  ) : null}
                 </StyledTableCell>
               </StyledTableRow>
             ))

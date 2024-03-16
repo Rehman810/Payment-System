@@ -1,84 +1,143 @@
-import React from "react";
-import "../../styles.css";
-import { useNavigate } from "react-router-dom";
+import * as React from "react";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import Toolbar from "@mui/material/Toolbar";
+import IconButton from "@mui/material/IconButton";
+import Typography from "@mui/material/Typography";
+import Menu from "@mui/material/Menu";
+import Container from "@mui/material/Container";
+import Avatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+import Tooltip from "@mui/material/Tooltip";
+import MenuItem from "@mui/material/MenuItem";
+import { FaWallet } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
 
-const Navbar = () => {
-  const navigate = useNavigate();
+const pages = [
+  { name: "Payments", path: "/payments" },
+  { name: "Instant Payment", path: "/instantPayments" },
+  { name: "QR Code", path: "/qrCode" },
+];
+const settings = [
+  { name: "Profile", path: "/profile" },
+  { name: "Logout", path: "/logout" },
+];
+
+function ResponsiveAppBar() {
+  // const navigate = useNavigate();
+  const [anchorElUser, setAnchorElUser] = React.useState(null);
+
+  const handleOpenUserMenu = (event) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    console.log("Logging out...");
+    // navigate("/login");
+  };
 
   return (
-    <nav
-      className="navbar navbar-expand-lg navbar-light fixed-top shadow-sm"
-      id="mainNav"
+    <AppBar
+      position="static"
+      style={{ position: "fixed", top: 0, left: 0, zIndex: 20 }}
     >
-      <div className="container px-5">
-        <a className="navbar-brand fw-bold" href="#page-top">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="40"
-            height="40"
-            fill="currentColor"
-            className="bi bi-credit-card-2-back"
-            viewBox="0 0 16 16"
+      <Container maxWidth="xl">
+        <Toolbar disableGutters>
+          <Typography
+            variant="h6"
+            noWrap
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "row",
+            }}
+            component={Link}
+            to="/"
+            sx={{
+              mr: 2,
+              display: { xs: "none", md: "flex" },
+              fontFamily: "monospace",
+              fontWeight: 700,
+              letterSpacing: ".3rem",
+              color: "inherit",
+              textDecoration: "none",
+            }}
           >
-            <path d="M11 5.5a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5z" />
-            <path d="M2 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm13 2v5H1V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1m-1 9H2a1 1 0 0 1-1-1v-1h14v1a1 1 0 0 1-1 1" />
-          </svg>{" "}
-          Customer Portal
-        </a>
-        <button
-          className="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarResponsive"
-          aria-controls="navbarResponsive"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          Menu
-          <i className="bi-list"></i>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarResponsive">
-          <ul className="navbar-nav ms-auto me-4 my-3 my-lg-0">
-            <li className="nav-item">
-              <a className="nav-link me-lg-3" href="#features">
-                Services
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link me-lg-3" href="#features">
-                Solutions
-              </a>
-            </li>
+            <FaWallet size={30} />
+            &nbsp; CUSTOMER PORTAL
+          </Typography>
 
-            <li className="nav-item">
-              <a className="nav-link me-lg-3" href="#features">
-                Pricing
-              </a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link me-lg-3" href="#features">
-                Help Center
-              </a>
-            </li>
-          </ul>
-          <button
-            type="button"
-            className="btn btn-light"
-            onClick={() => navigate("/login")}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            className="btn btn-light"
-            onClick={() => navigate("/signup")}
-          >
-            SignUp
-          </button>
-        </div>
-      </div>
-    </nav>
+          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
+            {pages.map((page) => (
+              <Button
+                key={page.name}
+                component={Link}
+                to={page.path}
+                sx={{ my: 2, color: "white", display: "block" }}
+              >
+                {page.name}
+              </Button>
+            ))}
+          </Box>
+
+          <Box sx={{ flexGrow: 0 }}>
+            <Tooltip title="Open settings">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: "45px" }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
+            >
+              {settings.map((setting) => (
+                <MenuItem key={setting.name} onClick={handleCloseUserMenu}>
+                  {setting.name === "Logout" ? (
+                    <Button onClick={handleLogout}>
+                      <Typography
+                        textAlign="center"
+                        style={{
+                          color: "red",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {setting.name}
+                      </Typography>
+                    </Button>
+                  ) : (
+                    <Link
+                      to={setting.path}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      <Typography textAlign="center">{setting.name}</Typography>
+                    </Link>
+                  )}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
+        </Toolbar>
+      </Container>
+    </AppBar>
   );
-};
+}
 
-export default Navbar;
+export default ResponsiveAppBar;

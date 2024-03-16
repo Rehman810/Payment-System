@@ -10,8 +10,8 @@ const tok = process.env.JWT_TOKEN_KEY;
 
 // Define Joi schema for signup validation
 const schema = Joi.object({
-  userName: Joi.string().required().max(12),
-  phone: Joi.string().required().max(11),
+  userName: Joi.string().required().max(20),
+  phone: Joi.string().required().max(12),
   email: Joi.string().required().email(),
   password: Joi.string().required().max(8),
 });
@@ -157,5 +157,31 @@ export const getPayments = async (req, res) => {
   } catch (error) {
     console.error("Error fetching payments:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Define a route to get the customer ID
+export const customerId = async (req, res) => {
+  // Retrieve the JWT token from the request header
+  const token =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
+
+  // Check if token is present
+  if (!token) {
+    return res.status(401).json({ message: "Authentication token required" });
+  }
+
+  try {
+    // Decode the JWT token
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Extract customer ID from the decoded token
+    const customerId = decodedToken._id;
+
+    // Send the customer ID in the response
+    res.json({ customerId });
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    res.status(403).json({ message: "Invalid token" });
   }
 };

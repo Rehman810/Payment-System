@@ -4,7 +4,7 @@ import Dashboard from "./Pages/Dashboard";
 import Login from "./Pages/Login";
 import AllCustomers from "./Pages/AllCustomers";
 import PaymentRequest from "./Pages/PaymentRequest";
-
+import "./styles.css";
 const Main = () => {
   return (
     <div>

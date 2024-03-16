@@ -1,19 +1,27 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./Pages/Dashboard";
-import Login from "./Pages/Login";
+import Dashboard from "./Pages/components/Payments/Dashboard";
+import Login from "./Pages/LoginSignup/Login";
 import AllCustomers from "./Pages/AllCustomers";
-import SignUp from "./SignUp";
+import SignUp from "./Pages/LoginSignup/SignUp";
+import Protected from "./Protected";
+import InstantPayment from "./Pages/components/InstantPayment/InstantPayment";
 
 const Main = () => {
   return (
     <div>
       <BrowserRouter>
         <Routes>
-          <Route path="/" Component={Dashboard} />
-          <Route path="/login" Component={Login} />
-          <Route path="/signup" Component={SignUp} />
-          <Route path="/dashboard" Component={AllCustomers} />
+          <Route path="/login" element={<Protected Component={Login} />} />
+          <Route path="/signup" element={<Protected Component={SignUp} />} />
+          <Route
+            path="/payments"
+            element={<Protected Component={Dashboard} />}
+          />
+          <Route
+            path="/instantPayments"
+            element={<Protected Component={InstantPayment} />}
+          />
         </Routes>
       </BrowserRouter>
     </div>

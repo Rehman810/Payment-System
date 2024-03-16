@@ -1,6 +1,6 @@
 import React from "react";
-import Navbar2 from "./components/Navbar2";
-import Table from "./Table";
+// import Navbar2 from "./components/Navbar2";
+import Table from "./components/Payments/Table";
 
 const AllCustomers = () => {
   return (
