@@ -5,7 +5,8 @@ import {
   respondToPaymentRequest,
   getPayments,
   authenticateToken,
-  customerId,
+  getCustomerInfo,
+  records,
 } from "./customer.js";
 
 const router = express.Router();
@@ -18,6 +19,7 @@ router.post(
   respondToPaymentRequest
 );
 router.get("/getPayments", authenticateToken, getPayments);
-router.get("/customer-id", customerId);
+router.get("/getCustomerInfo", authenticateToken, getCustomerInfo);
+router.get("/records", authenticateToken, records);
 
 export default router;

@@ -14,10 +14,7 @@ const Main = () => {
         <Routes>
           <Route path="/login" element={<Protected Component={Login} />} />
           <Route path="/signup" element={<Protected Component={SignUp} />} />
-          <Route
-            path="/payments"
-            element={<Protected Component={Dashboard} />}
-          />
+          <Route path="/" element={<Protected Component={Dashboard} />} />
           <Route
             path="/instantPayments"
             element={<Protected Component={InstantPayment} />}

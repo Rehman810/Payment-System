@@ -31,7 +31,7 @@ const Login = () => {
         values
       );
       localStorage.setItem("token", response.data.token);
-      navigate("/payments");
+      navigate("/");
     } catch (error) {
       console.error("Error:", error);
       Swal.fire({

@@ -6,9 +6,9 @@ const Protected = (props) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const uid = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-    if (!uid) {
+    if (!token) {
       navigate("/login");
     }
   }, []);

@@ -4,19 +4,22 @@ const paymentSchema = new mongoose.Schema(
   {
     amount: { type: Number, required: true },
     description: { type: String, required: false },
-    customerId: {
+    customerAccountNumber: {
       type: String,
-      ref: "Customer",
       required: true,
     },
-    merchantId: {
+    userName: {
+      type: String,
+      trim: true,
+    },
+    merchantAccountNumber: {
       type: String,
       ref: "Merchant",
       required: true,
     },
     status: {
       type: String,
-      // enum: ["pending", "approve", "reject"],
+      enum: ["pending", "paid", "rejected"],
       default: "pending",
     },
   },

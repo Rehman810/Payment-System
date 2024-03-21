@@ -10,7 +10,7 @@ const Dashboard = () => {
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "column",
-        height: "70vh",
+        height: "95vh",
       }}
     >
       <Navbar />

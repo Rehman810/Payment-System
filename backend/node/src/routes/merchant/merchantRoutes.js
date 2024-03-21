@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 router.post("/login", login);
 router.post("/requestPayment", authenticateToken, requestPayment);
-router.get("/getPayments", getPayments);
+router.get("/getPayments", authenticateToken, getPayments);
 router.get("/getSpecificPayment/:paymentId", getSpecificPayment);
 
 export default router;

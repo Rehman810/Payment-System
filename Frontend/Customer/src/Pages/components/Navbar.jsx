@@ -14,7 +14,7 @@ import { FaWallet } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 
 const pages = [
-  { name: "Payments", path: "/payments" },
+  { name: "Payments", path: "/" },
   { name: "Instant Payment", path: "/instantPayments" },
   { name: "QR Code", path: "/qrCode" },
 ];
@@ -24,7 +24,7 @@ const settings = [
 ];
 
 function ResponsiveAppBar() {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [anchorElUser, setAnchorElUser] = React.useState(null);
 
   const handleOpenUserMenu = (event) => {
@@ -38,7 +38,7 @@ function ResponsiveAppBar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     console.log("Logging out...");
-    // navigate("/login");
+    navigate("/login");
   };
 
   return (

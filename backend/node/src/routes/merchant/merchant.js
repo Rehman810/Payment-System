@@ -1,9 +1,11 @@
 import jwt from "jsonwebtoken";
 import Payment from "../../schema/paymentSchema.js";
+import mainSchema from "../../schema/customerSchema.js";
 import * as dotenv from "dotenv";
 dotenv.config();
 
 const tok = process.env.JWT_TOKEN_KEY;
+const MerchantAccountNumber = process.env.MERCHANT_ACCOUNT_NUMBER;
 
 export const login = async (req, res) => {
   try {
@@ -20,7 +22,7 @@ export const login = async (req, res) => {
     ) {
       // Generate JWT token for the merchant with dynamic role assignment
       const token = jwt.sign(
-        { email: email, role: "merchant" }, // Hardcoded merchant ID
+        { email: email, accountNumber: MerchantAccountNumber }, // Hardcoded merchant ID
         tok
       );
       res.json({ token });
@@ -51,12 +53,6 @@ export const authenticateToken = (req, res, next) => {
         return res.status(403).json({ message: "Invalid token" });
       }
 
-      // Check for valid role in decoded token
-      if (decoded.role !== "merchant") {
-        // Return specific error message for unauthorized access
-        return res.status(403).json({ message: "Unauthorized" });
-      }
-
       // Attach decoded user information to the request object
       req.user = decoded;
       next();
@@ -70,25 +66,33 @@ export const authenticateToken = (req, res, next) => {
 
 export const requestPayment = async (req, res) => {
   try {
-    const { amount, description, customerId } = req.body;
+    const {
+      amount,
+      description,
+      customerAccountNumber,
+      merchantAccountNumber,
+    } = req.body;
 
     // Validate payment details
-    if (!amount || !description || !customerId) {
+    if (
+      !amount ||
+      !description ||
+      !customerAccountNumber ||
+      !merchantAccountNumber ||
+      merchantAccountNumber !== MerchantAccountNumber
+    ) {
       // Return specific error message for missing payment details
-      return res
-        .status(400)
-        .json({ message: "Missing required payment details" });
+      return res.status(400).json({
+        message: "Invalid payment details or merchant account number",
+      });
     }
-
-    // Extract merchantId from decoded JWT token
-    const merchantId = req.user.email;
 
     // Create new payment
     const newPayment = new Payment({
       amount,
       description,
-      customerId,
-      merchantId,
+      customerAccountNumber,
+      merchantAccountNumber,
       status: "pending",
     });
 
@@ -111,7 +115,6 @@ export const getPayments = async (req, res) => {
   try {
     // Retrieve all payments from the database
     const payments = await Payment.find();
-
     // Return success response with payments data
     res.json(payments);
   } catch (error) {

@@ -4,6 +4,7 @@
     align-items: flex-start;
     width: 80%;
     flex-direction: column;
+    margin-top: 100px;
 }
 .records{
     display: flex;
@@ -18,7 +19,8 @@
     font-weight: bold;
 }
 .record1, .record2, .record3{
-    width: 12vw;
+    width: 15vw;
+    height: 8vw;
     display: flex;
     justify-content: center;
     align-items: center;

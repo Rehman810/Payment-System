@@ -9,6 +9,8 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import axios from "axios";
 import Button from "@mui/material/Button";
+import "./table.css";
+import { usePaymentContext } from "../../../Context";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -30,10 +32,12 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
+let token = localStorage.getItem("token");
 export default function TableComp() {
+  const { updateAction } = usePaymentContext();
+
   const [data, setData] = useState([]);
-  let token = localStorage.getItem("token");
-  let [action, setAction] = useState(false);
+  let [action, setAction] = useState({});
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,7 +50,6 @@ export default function TableComp() {
             },
           }
         );
-        console.log("Response:", response.data);
         setData(response.data);
       } catch (error) {
         console.error("Error:", error);
@@ -58,7 +61,6 @@ export default function TableComp() {
 
   const handleButtonClick = async (value, paymentId) => {
     console.log("Button clicked:", value, "Payment ID:", paymentId);
-    let token = localStorage.getItem("token");
 
     try {
       const response = await axios.post(
@@ -71,8 +73,19 @@ export default function TableComp() {
           },
         }
       );
-      console.log("Response:", response.data);
-      setAction(true);
+      setAction((prevState) => ({
+        ...prevState,
+        [paymentId]: true,
+      }));
+      updateAction(paymentId, value);
+      setData((prevData) =>
+        prevData.map((item) => {
+          if (item._id === paymentId) {
+            item.status = value === "approve" ? "paid" : "reject";
+          }
+          return item;
+        })
+      );
     } catch (error) {
       console.error("Error:", error);
     }
@@ -94,17 +107,59 @@ export default function TableComp() {
           {data.length != 0 ? (
             data.map((a) => (
               <StyledTableRow key={a._id}>
-                <StyledTableCell component="th" scope="row">
-                  {a.customerId}
+                <StyledTableCell
+                  component="th"
+                  scope="row"
+                  style={{ color: "#00bdd5" }}
+                >
+                  {a.customerAccountNumber}
                 </StyledTableCell>
                 <StyledTableCell component="th" scope="row">
-                  {a.merchantId}
+                  {a.merchantAccountNumber}
                 </StyledTableCell>
                 <StyledTableCell align="right">{a.description}</StyledTableCell>
-                <StyledTableCell align="right">{a.status}</StyledTableCell>
-                <StyledTableCell align="right">{a.amount}</StyledTableCell>
                 <StyledTableCell align="right">
-                  {action == false ? (
+                  {a.status === "pending" ? (
+                    <span
+                      style={{
+                        borderRadius: "15px",
+                        padding: "10px",
+                        color: "#525151",
+                        backgroundColor: "#c1bcbc",
+                      }}
+                    >
+                      Pending
+                    </span>
+                  ) : a.status === "paid" ? (
+                    <span
+                      style={{
+                        borderRadius: "15px",
+                        padding: "10px",
+                        color: "#04e004",
+                        backgroundColor: "#bff7bf",
+                      }}
+                    >
+                      Succeeded
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        borderRadius: "15px",
+                        padding: "10px",
+                        color: "#fb0000",
+                        backgroundColor: "#fe8f8f",
+                      }}
+                    >
+                      Rejected
+                    </span>
+                  )}
+                </StyledTableCell>
+
+                <StyledTableCell align="right" style={{ fontWeight: "bolder" }}>
+                  {a.amount} PKR
+                </StyledTableCell>
+                <StyledTableCell align="right">
+                  {a.status === "pending" && !action[a._id] && (
                     <div>
                       <Button
                         variant="contained"
@@ -116,12 +171,12 @@ export default function TableComp() {
                       <Button
                         variant="contained"
                         color="error"
-                        onClick={() => handleButtonClick("Reject", a._id)}
+                        onClick={() => handleButtonClick("reject", a._id)}
                       >
                         Reject
                       </Button>
                     </div>
-                  ) : null}
+                  )}
                 </StyledTableCell>
               </StyledTableRow>
             ))

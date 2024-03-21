@@ -8,13 +8,61 @@ dotenv.config();
 
 const tok = process.env.JWT_TOKEN_KEY;
 
+// Middleware function to authenticate JWT token and attach user to request object
+export const authenticateToken = (req, res, next) => {
+  const token =
+    req.headers.authorization && req.headers.authorization.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "Authentication token required" });
+  }
+
+  jwt.verify(token, tok, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid token" });
+    }
+
+    // Attach user information to the request object
+    req.user = decoded;
+    next();
+  });
+};
+
 // Define Joi schema for signup validation
 const schema = Joi.object({
   userName: Joi.string().required().max(20),
   phone: Joi.string().required().max(12),
   email: Joi.string().required().email(),
-  password: Joi.string().required().max(8),
+  password: Joi.string().required().min(8).max(15),
 });
+
+function generateToken(user) {
+  return jwt.sign(
+    { email: user.email, accountNumber: user.accountNumber, _id: user._id },
+    tok
+  );
+}
+
+async function generateUniqueRandomNumber() {
+  let randomNumber;
+  let isUnique = false;
+
+  // Generate random numbers until a unique one is found
+  while (!isUnique) {
+    // Generate a random number (adjust the range as needed)
+    randomNumber = Math.floor(Math.random() * 10000000000000);
+
+    // Check if the number exists in the database
+    isUnique = !(await isNumberExists(randomNumber));
+  }
+
+  return randomNumber;
+}
+
+async function isNumberExists(number) {
+  const result = await mainSchema.findOne({ number });
+  return !!result; // return true if number exists, false otherwise
+}
 
 export const signup = async (req, res) => {
   try {
@@ -33,17 +81,21 @@ export const signup = async (req, res) => {
     // Hash the password
     const hash = bcrypt.hashSync(req.body.password, 10);
 
-    // Create a new customer record
+    // Generate a unique random number
+    const randomNumber = await generateUniqueRandomNumber();
+
+    // Create a new customer record with the random number
     const newUser = new mainSchema({
       ...req.body,
       password: hash,
+      accountNumber: randomNumber,
     });
 
-    // Save the new customer record
+    // Save the new customer record including the random number
     const response = await newUser.save();
 
     // Generate JWT token for the new customer
-    const token = jwt.sign({ email: response.email, _id: response._id }, tok);
+    const token = generateToken(response);
 
     // Send success response with token
     res
@@ -65,18 +117,19 @@ export const login = async (req, res) => {
       const match = bcrypt.compareSync(req.body.password, user[0].password);
       if (match) {
         // Generate JWT token for the user
-        const token = jwt.sign(
-          {
-            email: user[0].email,
-            _id: user[0]._id,
-          },
-          tok
-        );
+        // const token = jwt.sign(
+        //   {
+        //     email: user[0].email,
+        //     _id: user[0]._id,
+        //   },
+        //   tok
+        // );
+        const token = generateToken(user[0]);
 
         // Send success response with token
         res
           .status(200)
-          .json({ status: 200, message: "User login successful", token });
+          .json({ status: 200, message: "Customer login successful", token });
       } else {
         // Return error response for incorrect email/password
         res
@@ -85,7 +138,7 @@ export const login = async (req, res) => {
       }
     } else {
       // Return error response if user not found
-      res.status(404).json({ status: 404, message: "User not found" });
+      res.status(404).json({ status: 404, message: "Customer not found" });
     }
   } catch (error) {
     // Handle server errors
@@ -126,31 +179,10 @@ export const respondToPaymentRequest = async (req, res) => {
   }
 };
 
-// Middleware function to authenticate JWT token and attach user to request object
-export const authenticateToken = (req, res, next) => {
-  const token =
-    req.headers.authorization && req.headers.authorization.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "Authentication token required" });
-  }
-
-  jwt.verify(token, tok, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: "Invalid token" });
-    }
-
-    // Attach user information to the request object
-    req.user = decoded;
-    next();
-  });
-};
-
 export const getPayments = async (req, res) => {
   try {
-    // Retrieve payments associated with the current user
     const payments = await Payment.find({
-      customerId: req.user._id,
+      customerAccountNumber: req.user.accountNumber,
     });
 
     res.json(payments);
@@ -160,28 +192,39 @@ export const getPayments = async (req, res) => {
   }
 };
 
-// Define a route to get the customer ID
-export const customerId = async (req, res) => {
-  // Retrieve the JWT token from the request header
+export const getCustomerInfo = async (req, res) => {
   const token =
     req.headers.authorization && req.headers.authorization.split(" ")[1];
 
-  // Check if token is present
   if (!token) {
     return res.status(401).json({ message: "Authentication token required" });
   }
-
   try {
-    // Decode the JWT token
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Extract customer ID from the decoded token
+    const decodedToken = jwt.verify(token, tok);
     const customerId = decodedToken._id;
-
-    // Send the customer ID in the response
-    res.json({ customerId });
+    console.log(decodedToken._id);
+    const customerInfo = await mainSchema
+      .findById(customerId)
+      .select("-password");
+    res.json({ customerInfo });
   } catch (error) {
     console.error("Error decoding token:", error);
     res.status(403).json({ message: "Invalid token" });
+  }
+};
+
+export const records = async (req, res) => {
+  try {
+    // Fetch total counts of pending, paid, and rejected records
+    const totalPending = await Payment.countDocuments({ status: "pending" });
+    const totalPaid = await Payment.countDocuments({ status: "paid" });
+    const totalRejected = await Payment.countDocuments({ status: "rejected" });
+
+    // Send the totals as a JSON response
+    res.json({ totalPending, totalPaid, totalRejected });
+  } catch (error) {
+    // Handle errors
+    console.error("Error fetching total records:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
